@@ -31,8 +31,15 @@ class BMPData {
 			return avg;
 		}
 
+		static vector<RGBData> getAvg (vector<RGBData> avg1, vector<RGBData> avg2) {
+			vector<RGBData> result;
+			for (ulong i = 0; i < avg1.size (); i++)
+				result.push_back (avg1[i].getAvg (avg2[i]));
+
+			return result;
+		}
+
 		vector<RGBData> getDifference (BMPData &bmpFile) {
-			cout << "Calculating difference...\n";
 			vector<RGBData> secondMap = bmpFile.imgBits;
 			if (imgBits.size () != secondMap.size ()) {
 				cerr << "Data is not of equal length\n";
@@ -42,8 +49,10 @@ class BMPData {
 			vector<RGBData> diff;
 			vector<RGBData> avg1 = smoothenBits ();
 			vector<RGBData> avg2 = bmpFile.smoothenBits ();
+			vector<RGBData> avgFinal = getAvg (avg1, avg2);
 
-			for (uint i = 0; i < imgBits.size (); i++) {
+			cout << "Calculating difference...\n";
+			for (ulong i = 0; i < imgBits.size (); i++) {
 				uchar r = RGBData::R;
 				uchar g = RGBData::G;
 				uchar b = RGBData::B;
@@ -54,22 +63,24 @@ class BMPData {
 				uchar gDiff = abs ((int)(cols[g]) - (int)(imgBits[i].getColor (g)));
 				uchar bDiff = abs ((int)(cols[b]) - (int)(imgBits[i].getColor (b)));
 
-				uchar rQuality1 = abs ((int)avg1[i].getColor (r) - (int)imgBits[i].getColor (r));
-				uchar gQuality1 = abs ((int)avg1[i].getColor (g) - (int)imgBits[i].getColor (g));
-				uchar bQuality1 = abs ((int)avg1[i].getColor (b) - (int)imgBits[i].getColor (b));
+				uchar rQuality1 = abs ((int)avgFinal[i].getColor (r) - (int)imgBits[i].getColor (r));
+				uchar gQuality1 = abs ((int)avgFinal[i].getColor (g) - (int)imgBits[i].getColor (g));
+				uchar bQuality1 = abs ((int)avgFinal[i].getColor (b) - (int)imgBits[i].getColor (b));
 
-				uchar rQuality2 = abs ((int)avg2[i].getColor (r) - (int)bmpFile.imgBits[i].getColor (r));
-				uchar gQuality2 = abs ((int)avg2[i].getColor (g) - (int)bmpFile.imgBits[i].getColor (g));
-				uchar bQuality2 = abs ((int)avg2[i].getColor (b) - (int)bmpFile.imgBits[i].getColor (b));
+				uchar rQuality2 = abs ((int)avgFinal[i].getColor (r) - (int)bmpFile.imgBits[i].getColor (r));
+				uchar gQuality2 = abs ((int)avgFinal[i].getColor (g) - (int)bmpFile.imgBits[i].getColor (g));
+				uchar bQuality2 = abs ((int)avgFinal[i].getColor (b) - (int)bmpFile.imgBits[i].getColor (b));
 
 				bool qScores1[RGBData::MAXCOLORS] = { rQuality1 < rQuality2, gQuality1 < gQuality2, bQuality1 < bQuality2 };
 				bool qScores2[RGBData::MAXCOLORS] = { rQuality1 > rQuality2, gQuality1 > gQuality2, bQuality1 > bQuality2 };
 
 				for (uchar j = 0; j < RGBData::MAXCOLORS; j++) {
 					if (qScores1[j] == qScores2[j]) continue;
+					uchar qScoreColor1 = 256 - (j == 0 ? rQuality1 : (j == 1 ? gQuality1 : bQuality1));
+					uchar qScoreColor2 = 256 - (j == 0 ? rQuality2 : (j == 1 ? gQuality2 : bQuality2));
 
-					if (qScores1[j]) qScore++;
-					else bmpFile.qScore++;
+					if (qScores1[j]) qScore += qScoreColor1;
+					else bmpFile.qScore += qScoreColor2;
 				}
 
 				RGBData colorDiff (rDiff, gDiff, bDiff);
