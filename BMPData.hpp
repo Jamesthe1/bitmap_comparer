@@ -86,7 +86,7 @@ class BMPData {
 				RGBData colorDiff (rDiff, gDiff, bDiff);
 				diff.push_back (colorDiff);
 
-				cout << (ulong)((double)(i * 100) / imgBits.size ()) << "% (" << i << '/' << imgBits.size () << ")\n";
+				cout << (ulong)((double)(i * 100) / imgBits.size ()) << "% (" << i << '/' << imgBits.size () << ")" << endl;
 			}
 			cout << "DIFFERENCE CALCULATED\n";
 
@@ -107,7 +107,7 @@ class BMPData {
 				if (i % scale[W] == scale[W] - 1)
 					for (uint j = 0; j < whdiff; j++)
 						trueBitmap.push_back (0);
-				cout << (ulong)((double)(i * 100) / imgBits.size ()) << "% (" << i << '/' << imgBits.size () << ")\n";
+				cout << (ulong)((double)(i * 100) / imgBits.size ()) << "% (" << i << '/' << imgBits.size () << ")" << endl;
 			}
 			cout << "HEX MAP CREATED\n";
 		}

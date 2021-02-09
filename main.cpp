@@ -8,6 +8,7 @@ vector<RGBData> colorDiff;
 BMPData bmps[2];
 string fname;
 bool allPassed = false;				// Used for check in closeBMPs () to only display a specific message if the exit code is not ERR_OK
+bool doQScore = true;
 
 void closeBmps () {
 	// Separated because atexit does not like using foreach
@@ -39,10 +40,12 @@ void writeLog (ulong qScore1, ulong qScore2, char *argv[]) {
 }
 
 int main (int argc, char *argv[]) {
-	if (argc < 2) cerr << "Missing initial file (bmpcompare >file1< file2)\n";
-	if (argc < 3) cerr << "Missing second file (bmpcompare file1 >file2<)\n";
+	if (argc < 2) cerr << "Missing initial file (bmpcompare >file1< file2 [doQScore])\n";
+	if (argc < 3) cerr << "Missing second file (bmpcompare file1 >file2< [doQScore])\n";
 
 	if (argc < 3) return ERR_NO_FILE;
+
+	if (argc >= 4) doQScore = string (argv[3]) != "false";
 
 	cout << "Output name: ";
 	cin >> fname;
@@ -100,7 +103,7 @@ int main (int argc, char *argv[]) {
 		bmps[i].bpp = hexStrToUShort (buffer, LEN_PIXELLEN);
 
 		if (bmps[i].bpp != 24) {
-			cerr << "File " << filename << " is not 24-bit; the program currently does not support transparency\n";
+			cerr << "File " << filename << " is not 24-bit; the program currently does not support any other modes\n";
 			return ERR_NOT_24;
 		}
 
@@ -160,7 +163,7 @@ int main (int argc, char *argv[]) {
 			//cout << "DONE; pushing\n";
 
 			bmps[i].imgBits.push_back (colorData);				// Eclipse shows an error but it is perfectly normal to put in a standard value; no compilation issues
-			cout << (ulong)((double)(curLoc - bmps[i].imgLoc) * 100 / (eof - bmps[i].imgLoc)) << "% (" << (curLoc - bmps[i].imgLoc) << '/' << (eof - bmps[i].imgLoc) << ")\n";
+			cout << (ulong)((double)(curLoc - bmps[i].imgLoc) * 100 / (eof - bmps[i].imgLoc)) << "% (" << (curLoc - bmps[i].imgLoc) << '/' << (eof - bmps[i].imgLoc) << ")" << endl;
 		}
 
 		bmps[i].bmp.close ();
@@ -198,7 +201,7 @@ int main (int argc, char *argv[]) {
 	cout << "Converting bitmap vector to array (this may take a while)...\n";
 	for (ulong i = 0; i < trueLength; i++) {
 		bigmap[i] = newData.trueBitmap[i];
-		cout << (ulong)((double)(i * 100) / trueLength) << "% (" << i << '/' << trueLength << ")\n";
+		cout << (ulong)((double)(i * 100) / trueLength) << "% (" << i << '/' << trueLength << ")" << endl;
 	}
 	cout << "DATA COPIED\n";
 
